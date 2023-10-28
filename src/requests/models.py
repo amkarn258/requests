@@ -111,7 +111,6 @@ class RequestEncodingMixin:
         2-tuples. Order is retained if data is a list of 2-tuples but arbitrary
         if parameters are supplied as a dict.
         """
-
         if isinstance(data, (str, bytes)):
             return data
         elif hasattr(data, "read"):
@@ -119,6 +118,8 @@ class RequestEncodingMixin:
         elif hasattr(data, "__iter__"):
             result = []
             for k, vs in to_key_val_list(data):
+                if not isinstance(vs, basestring) and not isinstance(vs,dict) and not vs:
+                    vs = ''
                 if isinstance(vs, basestring) or not hasattr(vs, "__iter__"):
                     vs = [vs]
                 for v in vs:
@@ -469,14 +470,12 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
 
         if isinstance(params, (str, bytes)):
             params = to_native_string(params)
-
         enc_params = self._encode_params(params)
         if enc_params:
             if query:
                 query = f"{query}&{enc_params}"
             else:
                 query = enc_params
-
         url = requote_uri(urlunparse([scheme, netloc, path, None, query, fragment]))
         self.url = url
 
